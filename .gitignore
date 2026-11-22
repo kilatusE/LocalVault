@@ -1,0 +1,29 @@
+# Gradle & build outputs
+.gradle/
+build/
+app/build/
+
+# Local environment paths (contains local Windows username)
+local.properties
+
+# Android Studio / IntelliJ IDEA
+.idea/
+*.iml
+.navigation/
+captures/
+output.json
+
+# Release signing keys & credentials (NEVER commit these!)
+*.jks
+*.keystore
+keystore.properties
+signing.properties
+
+# Test source code & test data (excluded from GitHub)
+app/src/test/
+app/src/androidTest/
+*.lvault
+
+# OS files
+.DS_Store
+Thumbs.db

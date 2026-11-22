@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- 案2：LV モノグラム ＋ 中央鍵穴 -->
+    <group
+        android:pivotX="54"
+        android:pivotY="54"
+        android:scaleX="0.92"
+        android:scaleY="0.92">
+
+        <!-- L の縦棒・横棒 -->
+        <path android:pathData="M24,26 L34,26 L34,68 L54,68 L50,77 L24,77 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient
+                    android:endX="54"
+                    android:endY="77"
+                    android:startX="24"
+                    android:startY="26"
+                    android:type="linear">
+                    <item android:color="#FFFFFFFF" android:offset="0.0" />
+                    <item android:color="#FFD1D5DB" android:offset="1.0" />
+                </gradient>
+            </aapt:attr>
+        </path>
+
+        <!-- V の左斜め〜右斜め -->
+        <path android:pathData="M43,26 L53,26 L61,60 L73,26 L84,26 L65,77 L55,77 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient
+                    android:endX="84"
+                    android:endY="77"
+                    android:startX="43"
+                    android:startY="26"
+                    android:type="linear">
+                    <item android:color="#FFFFFFFF" android:offset="0.0" />
+                    <item android:color="#FFC7D2FE" android:offset="0.6" />
+                    <item android:color="#FF9CA3AF" android:offset="1.0" />
+                </gradient>
+            </aapt:attr>
+        </path>
+
+        <!-- 中央の円形エンブレム（鍵穴台座） -->
+        <path
+            android:fillColor="#FFF8FAFC"
+            android:pathData="M56,37 A14,14 0 1,0 56,65 A14,14 0 1,0 56,37 Z" />
+
+        <!-- 中央の鍵穴（背景色で抜き） -->
+        <path
+            android:fillColor="#FF0D101D"
+            android:pathData="M56,43.5 A4.2,4.2 0 1,0 56,51.9 A4.2,4.2 0 1,0 56,43.5 Z" />
+        <path
+            android:fillColor="#FF0D101D"
+            android:pathData="M53.5,50 L58.5,50 L60.2,60.5 L51.8,60.5 Z" />
+    </group>
+</vector>
