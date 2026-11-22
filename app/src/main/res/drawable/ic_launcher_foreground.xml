@@ -1,60 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- 案2：LV モノグラム ＋ 中央鍵穴 -->
-    <group
-        android:pivotX="54"
-        android:pivotY="54"
-        android:scaleX="0.92"
-        android:scaleY="0.92">
+    <!-- 案C：鍵穴一体型 LV モノグラム（丸アイコンのセーフゾーン内に余白たっぷり配置） -->
+    <!-- L -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M26,33 L35,33 L35,63.5 L49,63.5 L51.8,72 L26,72 Z" />
 
-        <!-- L の縦棒・横棒 -->
-        <path android:pathData="M24,26 L34,26 L34,68 L54,68 L50,77 L24,77 Z">
-            <aapt:attr name="android:fillColor">
-                <gradient
-                    android:endX="54"
-                    android:endY="77"
-                    android:startX="24"
-                    android:startY="26"
-                    android:type="linear">
-                    <item android:color="#FFFFFFFF" android:offset="0.0" />
-                    <item android:color="#FFD1D5DB" android:offset="1.0" />
-                </gradient>
-            </aapt:attr>
-        </path>
+    <!-- V の本体 -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M44.5,33 L77.5,33 L66.5,72 L55.5,72 Z" />
 
-        <!-- V の左斜め〜右斜め -->
-        <path android:pathData="M43,26 L53,26 L61,60 L73,26 L84,26 L65,77 L55,77 Z">
-            <aapt:attr name="android:fillColor">
-                <gradient
-                    android:endX="84"
-                    android:endY="77"
-                    android:startX="43"
-                    android:startY="26"
-                    android:type="linear">
-                    <item android:color="#FFFFFFFF" android:offset="0.0" />
-                    <item android:color="#FFC7D2FE" android:offset="0.6" />
-                    <item android:color="#FF9CA3AF" android:offset="1.0" />
-                </gradient>
-            </aapt:attr>
-        </path>
+    <!-- V 上部の切れ込み（背景色で抜き） -->
+    <path
+        android:fillColor="#FF090A0F"
+        android:pathData="M54.5,32 L67.5,32 L61,48 Z" />
 
-        <!-- 中央の円形エンブレム（鍵穴台座） -->
-        <path
-            android:fillColor="#FFF8FAFC"
-            android:pathData="M56,37 A14,14 0 1,0 56,65 A14,14 0 1,0 56,37 Z" />
+    <!-- V 内側の鍵穴シルエット：円部（背景色で抜き） -->
+    <path
+        android:fillColor="#FF090A0F"
+        android:pathData="M61,44.2 A4.7,4.7 0 1,0 61,53.6 A4.7,4.7 0 1,0 61,44.2 Z" />
 
-        <!-- 中央の鍵穴（背景色で抜き） -->
-        <path
-            android:fillColor="#FF0D101D"
-            android:pathData="M56,43.5 A4.2,4.2 0 1,0 56,51.9 A4.2,4.2 0 1,0 56,43.5 Z" />
-        <path
-            android:fillColor="#FF0D101D"
-            android:pathData="M53.5,50 L58.5,50 L60.2,60.5 L51.8,60.5 Z" />
-    </group>
+    <!-- V 内側の鍵穴シルエット：下部スリット（背景色で抜き） -->
+    <path
+        android:fillColor="#FF090A0F"
+        android:pathData="M58.8,51.8 L63.2,51.8 L64.8,62.8 L57.2,62.8 Z" />
+
+    <!-- 右下のインディゴ アクセントドット -->
+    <path
+        android:fillColor="#FF818CF8"
+        android:pathData="M78.5,64.2 A3.9,3.9 0 1,0 78.5,72.0 A3.9,3.9 0 1,0 78.5,64.2 Z" />
 </vector>

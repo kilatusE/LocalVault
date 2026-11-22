@@ -16,6 +16,7 @@ output.json
 # Release signing keys & credentials (NEVER commit these!)
 *.jks
 *.keystore
+*.apk
 keystore.properties
 signing.properties
 
