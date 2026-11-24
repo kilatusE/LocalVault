@@ -58,7 +58,8 @@ import kotlinx.coroutines.launch
 fun UnlockScreen(
     biometricAvailableAndEnabled: Boolean,
     onRequestBiometricUnlock: () -> Unit,
-    onUnlockWithPassword: suspend (CharArray) -> Boolean
+    onUnlockWithPassword: suspend (CharArray) -> Boolean,
+    getRemainingLockoutSeconds: () -> Long = { 0L }
 ) {
     val colors = VaultTheme.colors
     val scope = rememberCoroutineScope()
@@ -216,7 +217,12 @@ fun UnlockScreen(
                             password = ""
                             isVerifying = false
                             if (!ok) {
-                                errorMessage = "パスワードが正しくありません"
+                                val remaining = getRemainingLockoutSeconds()
+                                errorMessage = if (remaining > 0L) {
+                                    "連続失敗のため一時ロック中です（あと約${remaining}秒お待ちください）"
+                                } else {
+                                    "パスワードが正しくありません"
+                                }
                             }
                         }
                     },

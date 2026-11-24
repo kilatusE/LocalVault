@@ -92,6 +92,7 @@ fun SettingsScreen(
             title = "バックアップを作成",
             description = "バックアップファイルを保護するためのパスワードを決めてください（8文字以上）。復元するときに必要になります。",
             confirmLabel = "保存先を選ぶ",
+            requireConfirmation = true,
             onDismiss = { showExportDialog = false },
             onConfirm = { pass ->
                 showExportDialog = false
@@ -105,6 +106,7 @@ fun SettingsScreen(
             title = "バックアップから復元",
             description = "バックアップ作成時に決めたパスワードを入力して、ファイルを選択してください。",
             confirmLabel = "ファイルを選ぶ",
+            requireConfirmation = false,
             onDismiss = { showImportDialog = false },
             onConfirm = { pass ->
                 showImportDialog = false
@@ -441,11 +443,16 @@ private fun PassphraseDialog(
     title: String,
     description: String,
     confirmLabel: String,
+    requireConfirmation: Boolean = false,
     onDismiss: () -> Unit,
     onConfirm: (CharArray) -> Unit
 ) {
     val colors = VaultTheme.colors
     var passphrase by remember { mutableStateOf("") }
+    var confirmPassphrase by remember { mutableStateOf("") }
+    val mismatch = requireConfirmation && confirmPassphrase.isNotEmpty() && passphrase != confirmPassphrase
+    val canSubmit = passphrase.length >= 8 && (!requireConfirmation || passphrase == confirmPassphrase)
+
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = colors.card,
@@ -473,18 +480,53 @@ private fun PassphraseDialog(
                     ),
                     modifier = Modifier.fillMaxWidth()
                 )
+                if (requireConfirmation) {
+                    Spacer(Modifier.height(10.dp))
+                    OutlinedTextField(
+                        value = confirmPassphrase,
+                        onValueChange = { confirmPassphrase = it },
+                        label = { Text("確認用パスワード（もう一度入力）") },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Password,
+                            autoCorrectEnabled = false,
+                            capitalization = KeyboardCapitalization.None
+                        ),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = colors.accent,
+                            unfocusedBorderColor = colors.borderStrong,
+                            focusedTextColor = colors.textPrimary,
+                            unfocusedTextColor = colors.textPrimary
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    if (mismatch) {
+                        Spacer(Modifier.height(6.dp))
+                        Text("確認用パスワードが一致しません", color = colors.danger, fontSize = 12.sp)
+                    }
+                }
             }
         },
         confirmButton = {
             TextButton(
-                enabled = passphrase.length >= 8,
-                onClick = { onConfirm(passphrase.toCharArray()) }
+                enabled = canSubmit,
+                onClick = {
+                    val chars = passphrase.toCharArray()
+                    passphrase = ""
+                    confirmPassphrase = ""
+                    onConfirm(chars)
+                }
             ) {
                 Text(confirmLabel, color = colors.accent)
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(onClick = {
+                passphrase = ""
+                confirmPassphrase = ""
+                onDismiss()
+            }) {
                 Text("キャンセル", color = colors.textSecondary)
             }
         }

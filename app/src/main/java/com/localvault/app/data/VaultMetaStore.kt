@@ -119,6 +119,36 @@ class VaultMetaStore(context: Context) {
         _clipboardClearSeconds.value = seconds
     }
 
+    fun getFailedUnlockAttempts(): Int =
+        prefs.getInt(KEY_FAILED_UNLOCK_ATTEMPTS, 0)
+
+    fun getLockoutUntilEpochMs(): Long =
+        prefs.getLong(KEY_LOCKOUT_UNTIL_MS, 0L)
+
+    fun recordFailedUnlockAttempt(nowMs: Long = System.currentTimeMillis()): Long {
+        val attempts = getFailedUnlockAttempts() + 1
+        val cooldownSec = calculateLockoutSeconds(attempts)
+        val lockoutUntil = if (cooldownSec > 0L) nowMs + cooldownSec * 1000L else 0L
+        prefs.edit()
+            .putInt(KEY_FAILED_UNLOCK_ATTEMPTS, attempts)
+            .putLong(KEY_LOCKOUT_UNTIL_MS, lockoutUntil)
+            .apply()
+        return cooldownSec
+    }
+
+    fun resetFailedUnlockAttempts() {
+        prefs.edit()
+            .putInt(KEY_FAILED_UNLOCK_ATTEMPTS, 0)
+            .putLong(KEY_LOCKOUT_UNTIL_MS, 0L)
+            .apply()
+    }
+
+    fun getRemainingLockoutSeconds(nowMs: Long = System.currentTimeMillis()): Long {
+        val until = getLockoutUntilEpochMs()
+        if (until <= nowMs) return 0L
+        return ((until - nowMs) + 999L) / 1000L
+    }
+
     companion object {
         private const val PREFS_NAME = "localvault_meta_v1"
         private const val KEY_PASSWORD_SALT = "password_salt"
@@ -137,5 +167,16 @@ class VaultMetaStore(context: Context) {
         private const val KEY_GEN_DIGITS = "gen_digits"
         private const val KEY_GEN_SYMBOLS = "gen_symbols"
         private const val KEY_GEN_EXCLUDE_AMBIGUOUS = "gen_exclude_ambiguous"
+        private const val KEY_FAILED_UNLOCK_ATTEMPTS = "failed_unlock_attempts"
+        private const val KEY_LOCKOUT_UNTIL_MS = "lockout_until_ms"
+
+        /**
+         * 連続失敗回数に応じたクールダウン秒数（5回失敗から指数バックオフ、最大900秒＝15分）。
+         */
+        fun calculateLockoutSeconds(failedAttempts: Int): Long {
+            if (failedAttempts < 5) return 0L
+            val shift = (failedAttempts - 5).coerceAtMost(5)
+            return (30L shl shift).coerceAtMost(900L)
+        }
     }
 }

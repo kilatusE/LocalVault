@@ -14,6 +14,7 @@ object BackupCryptoManager {
     private const val FORMAT_VERSION = 1
     private const val MIN_ITERATIONS = 1_000
     private const val MAX_ITERATIONS = 5_000_000
+    private const val MAX_BACKUP_JSON_LENGTH = 50 * 1024 * 1024 // 50MB 上限（OOM DoS防止）
 
     fun exportEncryptedBackup(
         credentials: List<Credential>,
@@ -44,10 +45,11 @@ object BackupCryptoManager {
 
         val salt = CryptoManager.generateSalt()
         val key = CryptoManager.deriveKeyFromPassword(passphrase, salt, iterations)
+        val plaintextBytes = innerJson.toByteArray(StandardCharsets.UTF_8)
         return try {
             val aad = "$FORMAT_MAGIC:$FORMAT_VERSION".toByteArray(StandardCharsets.UTF_8)
             val encrypted = CryptoManager.encryptAesGcm(
-                plaintext = innerJson.toByteArray(StandardCharsets.UTF_8),
+                plaintext = plaintextBytes,
                 key = key,
                 aad = aad
             )
@@ -61,6 +63,7 @@ object BackupCryptoManager {
                 put("ciphertext", CryptoManager.toBase64(encrypted.ciphertext))
             }.toString(2)
         } finally {
+            CryptoManager.zeroize(plaintextBytes)
             CryptoManager.zeroize(key)
         }
     }
@@ -69,6 +72,9 @@ object BackupCryptoManager {
         encryptedJson: String,
         passphrase: CharArray
     ): List<Credential> {
+        require(encryptedJson.length <= MAX_BACKUP_JSON_LENGTH) {
+            "バックアップファイルが大きすぎます"
+        }
         val outer = JSONObject(encryptedJson)
         require(outer.optString("magic") == FORMAT_MAGIC) {
             "無効なバックアップファイル形式です"

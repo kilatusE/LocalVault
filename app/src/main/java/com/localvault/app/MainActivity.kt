@@ -200,6 +200,9 @@ class MainActivity : FragmentActivity() {
                             onRequestBiometricUnlock = { launchBiometricUnlock(vaultManager) },
                             onUnlockWithPassword = { password ->
                                 vaultManager.unlockWithMasterPassword(password)
+                            },
+                            getRemainingLockoutSeconds = {
+                                vaultManager.getRemainingLockoutSeconds()
                             }
                         )
                     }

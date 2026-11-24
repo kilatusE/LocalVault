@@ -54,13 +54,25 @@ class VaultManager(private val appContext: Context) {
         }
     }
 
+    fun getRemainingLockoutSeconds(): Long = metaStore.getRemainingLockoutSeconds()
+
     /**
-     * マスターパスワードでロック解除する。成功時は true、誤パスワード時は false。
+     * マスターパスワードでロック解除する。成功時は true、誤パスワードまたはロックアウト中は false。
      */
     suspend fun unlockWithMasterPassword(masterPassword: CharArray): Boolean =
         withContext(Dispatchers.Default) {
-            val salt = metaStore.getPasswordSalt() ?: return@withContext false
-            val wrapped = metaStore.getPasswordWrappedDek() ?: return@withContext false
+            if (metaStore.getRemainingLockoutSeconds() > 0L) {
+                CryptoManager.zeroize(masterPassword)
+                return@withContext false
+            }
+            val salt = metaStore.getPasswordSalt() ?: run {
+                CryptoManager.zeroize(masterPassword)
+                return@withContext false
+            }
+            val wrapped = metaStore.getPasswordWrappedDek() ?: run {
+                CryptoManager.zeroize(masterPassword)
+                return@withContext false
+            }
             val iterations = metaStore.getPasswordIterations()
             val kek = CryptoManager.deriveKeyFromPassword(masterPassword, salt, iterations)
             try {
@@ -70,11 +82,13 @@ class VaultManager(private val appContext: Context) {
                     VaultSessionManager.unlock(dek)
                     // DBアクセス確認
                     VaultDatabase.getInstance(appContext, dek).credentialDao().getAll()
+                    metaStore.resetFailedUnlockAttempts()
                     true
                 } finally {
                     CryptoManager.zeroize(dek)
                 }
             } catch (_: Exception) {
+                metaStore.recordFailedUnlockAttempt()
                 false
             } finally {
                 CryptoManager.zeroize(kek)
@@ -110,6 +124,7 @@ class VaultManager(private val appContext: Context) {
                 try {
                     VaultSessionManager.unlock(dek)
                     VaultDatabase.getInstance(appContext, dek).credentialDao().getAll()
+                    metaStore.resetFailedUnlockAttempts()
                     true
                 } finally {
                     CryptoManager.zeroize(dek)

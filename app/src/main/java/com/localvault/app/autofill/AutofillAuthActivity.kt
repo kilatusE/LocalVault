@@ -98,6 +98,9 @@ class AutofillAuthActivity : FragmentActivity() {
         val passwordId = getParcelableCompat<AutofillId>(EXTRA_PASSWORD_ID)
         val pendingUsername = intent.getStringExtra(EXTRA_SAVE_USERNAME).orEmpty()
         val pendingPassword = intent.getStringExtra(EXTRA_SAVE_PASSWORD).orEmpty()
+        // Intent Extra に平文パスワードが残り続けるのを防ぐため読み取り直後に破棄
+        intent.removeExtra(EXTRA_SAVE_PASSWORD)
+        intent.removeExtra(EXTRA_SAVE_USERNAME)
 
         setContent {
             val isDarkTheme by vaultManager.metaStore.isDarkTheme.collectAsState()
@@ -297,7 +300,12 @@ class AutofillAuthActivity : FragmentActivity() {
                                                 if (ok) {
                                                     handlePostUnlock()
                                                 } else {
-                                                    errorMessage = "パスワードが正しくありません"
+                                                    val remaining = vaultManager.getRemainingLockoutSeconds()
+                                                    errorMessage = if (remaining > 0L) {
+                                                        "連続失敗のため一時ロック中です（あと約${remaining}秒）"
+                                                    } else {
+                                                        "パスワードが正しくありません"
+                                                    }
                                                 }
                                             }
                                         },

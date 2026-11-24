@@ -8,8 +8,14 @@ import java.util.Locale
  */
 object DomainMatcher {
     private val multiPartTlds = setOf(
-        "co.jp", "ne.jp", "or.jp", "ac.jp", "go.jp", "ed.jp", "gr.jp",
-        "co.uk", "org.uk", "ac.uk", "com.au", "co.kr", "com.tw", "com.br"
+        "co.jp", "ne.jp", "or.jp", "ac.jp", "go.jp", "ed.jp", "gr.jp", "lg.jp",
+        "co.uk", "org.uk", "ac.uk", "gov.uk", "com.au", "net.au", "org.au",
+        "co.kr", "or.kr", "com.tw", "org.tw", "com.br", "com.cn", "com.hk",
+        "com.sg", "co.in", "co.nz", "co.za",
+        // 共有ホスティング / PaaS ドメイン（サブドメイン間で別テナントとなるため同一サイトとみなさない）
+        "github.io", "gitlab.io", "pages.dev", "vercel.app", "netlify.app",
+        "web.app", "firebaseapp.com", "appspot.com", "herokuapp.com", "azurewebsites.net",
+        "cloudfront.net", "s3.amazonaws.com", "workers.dev"
     )
 
     fun extractDomain(rawUrlOrDomain: String): String {
@@ -17,12 +23,23 @@ object DomainMatcher {
         if (trimmed.isEmpty()) return ""
         return try {
             val withScheme = if (trimmed.contains("://")) trimmed else "https://$trimmed"
-            val host = URI(withScheme).host ?: trimmed
+            val uri = URI(withScheme)
+            val host = uri.host
+                ?: trimmed
+                    .substringAfter("://")
+                    .substringBefore("/")
+                    .substringBefore("?")
+                    .substringBefore("#")
+                    .substringAfterLast("@") // userinfo (https://good.com@evil.com) フィッシング対策
+                    .substringBefore(":")
             host.removePrefix("www.").trimEnd('.')
         } catch (_: Exception) {
             trimmed
                 .substringAfter("://")
                 .substringBefore("/")
+                .substringBefore("?")
+                .substringBefore("#")
+                .substringAfterLast("@")
                 .substringBefore(":")
                 .removePrefix("www.")
                 .trimEnd('.')
