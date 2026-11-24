@@ -25,6 +25,10 @@ app/src/test/
 app/src/androidTest/
 *.lvault
 
+# Internal AI rules & security audit logs (local only)
+AGENTS.md
+SECURITY_AUDIT_REPORT.md
+
 # OS files
 .DS_Store
 Thumbs.db
